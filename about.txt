@@ -1,0 +1,19 @@
+Standard Commands-
+
+Weather: You can ask for the current weather in any city (e.g., "What is the weather in Paris?").
+
+Date: You can ask for the current date (e.g., "What is the date today?").
+
+News: It can fetch the top 3 news headlines from India.
+
+Web Browsing: It can open Google and YouTube for you.
+
+Calendar Events: It can generate a Google Calendar link for an event you describe (e.g., "Create a calendar event for a team meeting").
+
+Advanced Gemini AI Features-
+
+Conversational AI: For any command that isn't one of the standard ones above, Elena uses the Gemini LLM to provide a smart, conversational response.
+
+Image Analysis: You can upload an image and ask a question about it. Elena uses Gemini's multimodal capabilities to analyze the picture and answer your query.
+
+Suggested Replies: After Elena responds, it uses Gemini to generate three relevant follow-up questions, making the conversation flow more naturally.

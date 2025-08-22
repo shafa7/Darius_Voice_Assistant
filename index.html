@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darius Voice Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Dark Mode Color Palette */
+        :root {
+            --background-dark: #1A1A1A;
+            --container-dark: #2C2C2C;
+            --header-dark: #121212;
+            --user-bubble: #707B6D; /* Olive Slate */
+            --assistant-bubble: #4A4E4A; /* Darker Pewter */
+            --text-light: #F7F2E0; /* Pearl */
+            --accent-color: #BF897F; /* Salmon Pink */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1538342021511-33cd930a4a28?q=80&w=1974&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Glassmorphism Effect for the main container */
+        #chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+            /* Removed max-width and margin to make it full page */
+            background-color: rgba(26, 26, 26, 0.85); /* --background-dark with transparency */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        #header {
+            background-color: var(--header-dark);
+            color: var(--text-light);
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            flex-shrink: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #message-container {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chat-bubble {
+            padding: 0.75rem 1.25rem;
+            border-radius: 20px;
+            max-width: 75%;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .user-message {
+            background-color: var(--user-bubble);
+            color: var(--text-light);
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .assistant-message {
+            background-color: var(--assistant-bubble);
+            color: var(--text-light);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        
+        #input-area {
+            display: flex;
+            padding: 1rem;
+            background-color: rgba(18, 18, 18, 0.5); /* --header-dark with transparency */
+            gap: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        #status {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            color: #a0a0a0; /* Lighter gray for status */
+            font-style: italic;
+        }
+
+        .action-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--assistant-bubble);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        .action-button:hover {
+            background-color: var(--user-bubble);
+        }
+        .mic-button.listening {
+            animation: pulse 1.5s infinite;
+            background-color: var(--accent-color);
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(191, 137, 127, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(191, 137, 127, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(191, 137, 127, 0); }
+        }
+
+        .suggestions-container { display: flex; gap: 0.5rem; align-self: flex-start; margin-top: 0.5rem; flex-wrap: wrap; }
+        .suggestion-chip {
+            background-color: transparent;
+            border: 1px solid var(--user-bubble);
+            color: var(--text-light);
+            padding: 0.3rem 0.8rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .suggestion-chip:hover {
+            background-color: var(--user-bubble);
+            color: var(--text-light);
+        }
+        .user-image-container { align-self: flex-end; max-width: 75%; }
+        .user-image-container img { max-width: 200px; border-radius: 12px; margin-bottom: 0.25rem; }
+    </style>
+</head>
+<body>
+
+    <div id="chat-container">
+        <div id="header">Darius</div>
+        <div id="message-container">
+            <div class="chat-bubble assistant-message">
+                Hello! Click the microphone to talk to me.
+            </div>
+        </div>
+        <div id="input-area">
+            <div id="status">Ready</div>
+            <!-- Image upload button and input removed -->
+            <button id="micButton" class="action-button mic-button" title="Speak">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 16 16"><path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0V3z"/><path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const micButton = document.getElementById('micButton');
+        const statusDiv = document.getElementById('status');
+        const messageContainer = document.getElementById('message-container');
+
+        let isListening = false;
+        let recognition;
+
+        // --- Voice Recognition Setup ---
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => { isListening = true; micButton.classList.add('listening'); statusDiv.textContent = 'Listening...'; };
+            recognition.onresult = (event) => { const transcript = event.results[0][0].transcript; addMessage(transcript, 'user'); sendToServer(transcript); };
+            recognition.onerror = (event) => { console.error('Speech recognition error', event.error); statusDiv.textContent = 'Error: ' + event.error; };
+            recognition.onend = () => { isListening = false; micButton.classList.remove('listening'); if (statusDiv.textContent === 'Listening...') statusDiv.textContent = 'Ready'; };
+        } else {
+            statusDiv.textContent = 'Speech not supported.';
+            micButton.style.display = 'none';
+        }
+
+        micButton.addEventListener('click', () => { if (isListening) recognition.stop(); else recognition.start(); });
+        
+        // --- Message Display Functions ---
+        function addMessage(text, sender) {
+            clearSuggestions();
+            const bubble = document.createElement('div');
+            bubble.classList.add('chat-bubble', sender === 'user' ? 'user-message' : 'assistant-message');
+            bubble.textContent = text;
+            messageContainer.appendChild(bubble);
+            if (sender === 'assistant') fetchAndDisplaySuggestions(text);
+            scrollToBottom();
+        }
+
+        // --- Gemini Feature: Suggested Replies ---
+        async function fetchAndDisplaySuggestions(text) {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/suggest-replies', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text }),
+                });
+                const data = await response.json();
+                if (data.suggestions && data.suggestions.length > 0) {
+                    const suggestionsContainer = document.createElement('div');
+                    suggestionsContainer.className = 'suggestions-container';
+                    data.suggestions.forEach(suggestion => {
+                        const chip = document.createElement('button');
+                        chip.className = 'suggestion-chip';
+                        chip.textContent = suggestion;
+                        chip.onclick = () => {
+                            addMessage(suggestion, 'user');
+                            sendToServer(suggestion);
+                        };
+                        suggestionsContainer.appendChild(chip);
+                    });
+                    messageContainer.appendChild(suggestionsContainer);
+                    scrollToBottom();
+                }
+            } catch (error) {
+                console.error('Error fetching suggestions:', error);
+            }
+        }
+        
+        function clearSuggestions() {
+            const existingContainer = document.querySelector('.suggestions-container');
+            if (existingContainer) existingContainer.remove();
+        }
+
+        // --- Server Communication ---
+        async function sendToServer(text) {
+            statusDiv.textContent = 'Thinking...';
+            try {
+                const response = await fetch('http://127.0.0.1:5000/process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: text }),
+                });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                addMessage(data.response, 'assistant');
+                speak(data.response);
+            } catch (error) {
+                console.error('Error sending data to server:', error);
+                addMessage('Sorry, I had trouble connecting to my brain.', 'assistant');
+            } finally {
+                statusDiv.textContent = 'Ready';
+            }
+        }
+
+        // --- Utility Functions ---
+        function speak(text) { const utterance = new SpeechSynthesisUtterance(text); speechSynthesis.speak(utterance); }
+        function scrollToBottom() { messageContainer.scrollTop = messageContainer.scrollHeight; }
+    </script>
+</body>
+</html>
